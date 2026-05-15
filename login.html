@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ========== 左侧插画区 ========== */
+.illustration-area {
+  flex: 0 0 50%;
+  background: #f5f0fa;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* 左上角标识 */
+.brand-tag {
+  position: absolute;
+  top: 32px;
+  left: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #5c4a7a;
+  letter-spacing: 2px;
+}
+.brand-tag .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #8B5CF6;
+}
+
+/* 角色容器 */
+.characters-stage {
+  position: relative;
+  width: 420px;
+  height: 380px;
+}
+
+/* ---- 通用角色样式 ---- */
+.character {
+  position: absolute;
+  transition: transform 0.08s ease-out;
+}
+.character .body-shape {
+  position: relative;
+  width: 100%; height: 100%;
+}
+.character .eyes-row {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  left: 50%; transform: translateX(-50%);
+}
+
+/* 有眼白的眼睛 */
+.eye-white {
+  border-radius: 50%;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.eye-white .pupil {
+  border-radius: 50%;
+  background: #1a1a1a;
+  position: absolute;
+  transition: none;
+}
+
+/* 纯黑点眼睛（无眼白） */
+.eye-dot-wrap {
+  display: block;
+  position: relative;
+}
+.eye-dot {
+  border-radius: 50%;
+  background: #1a1a1a;
+  display: block;
+}
+
+/* 嘴巴横线 */
+.mouth-line {
+  position: absolute;
+  height: 2px;
+  background: #1a1a1a;
+  border-radius: 1px;
+}
+
+/* ---- 紫色角色（左后方，最高） ---- */
+.char-purple {
+  width: 126px; height: 320px;
+  bottom: 40px; left: 60px;
+  z-index: 1;
+}
+.char-purple .body-shape {
+  background: #8B5CF6;
+  border-radius: 10px 10px 0 0;
+  width: 100%; height: 100%;
+}
+.char-purple .eyes-row {
+  gap: 20px;
+}
+.char-purple .eye-white {
+  width: 16px; height: 16px;
+}
+.char-purple .eye-white .pupil {
+  width: 5px; height: 5px;
+  top: 65%;
+}
+
+/* ---- 黑色角色（中间后方，次高） ---- */
+.char-black {
+  width: 100px; height: 256px;
+  bottom: 40px; left: 170px;
+  z-index: 3;
+}
+.char-black .body-shape {
+  background: #1A1A1A;
+  border-radius: 10px 10px 0 0;
+  width: 100%; height: 100%;
+}
+.char-black .eyes-row {
+  gap: 16px;
+}
+.char-black .eye-white {
+  width: 16px; height: 16px;
+}
+.char-black .eye-white .pupil {
+  width: 5px; height: 5px;
+  top: 55%;
+}
+
+/* ---- 橙色角色（最前方，半圆形） ---- */
+.char-orange {
+  width: 170px; height: 130px;
+  bottom: 40px; left: 1px;
+  z-index: 4;
+}
+.char-orange .body-shape {
+  background: #F4A883;
+  border-radius: 100px 100px 0 0;
+  width: 100%; height: 100%;
+}
+.char-orange .eyes-row {
+  gap: 30px;
+}
+.char-orange .eye-dot {
+  width: 15px; height: 15px;
+}
+
+/* ---- 黄色角色（最右侧，最矮） ---- */
+.char-yellow {
+  width: 100px; height: 162px;
+  bottom: 40px; right: 75px;
+  z-index: 4;
+}
+.char-yellow .body-shape {
+  background: #F5D67B;
+  border-radius: 100px 100px 0 0;
+  width: 100%; height: 100%;
+}
+.char-yellow .eyes-row {
+  gap: 24px;
+}
+.char-yellow .eye-dot {
+  width: 12px; height: 12px;
+}
+.char-yellow .mouth-line {
+  top: 56px;
+  left: 50%; transform: translateX(-50%);
+  width: 60px; height: 4px;
+}
+
+/* 左下角链接 */
+.footer-links {
+  position: absolute;
+  bottom: 28px;
+  left: 40px;
+  font-size: 12px;
+  color: #b0a0c8;
+  display: flex;
+  gap: 16px;
+}
+.footer-links span { cursor: pointer; }
+.footer-links span:hover { color: #8B5CF6; }
+
+/* ========== 右侧表单区 ========== */
+.form-area {
+  flex: 0 0 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* 标题区 */
+.title-icon {
+  font-size: 22px;
+  color: #8B5CF6;
+  margin-bottom: 8px;
+}
+.form-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+  transition: color 0.4s;
+}
+.form-subtitle {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 40px;
+}
+.form-title.success { color: #4CAF50; }
+.form-title.error { color: #E53935; }
+
+/* 输入框 — 底部横线风格 */
+.input-group {
+  margin-bottom: 28px;
+  position: relative;
+}
+.input-group label {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.input-group .input-underline {
+  position: relative;
+}
+.input-group input {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 1.5px solid #ddd;
+  font-size: 15px;
+  color: #2D2D2D;
+  outline: none;
+  background: transparent;
+  transition: border-color 0.3s;
+}
+.input-group input:focus {
+  border-bottom-color: #8B5CF6;
+  border-bottom-width: 2px;
+}
+.input-group input.has-content {
+  border-bottom-color: #bbb;
+}
+.input-group input.error {
+  border-bottom-color: #E53935;
+  animation: shake 0.5s ease;
+}
+.input-group input.success {
+  border-bottom-color: #4CAF50;
+}
+
+/* 密码框眼睛切换 */
+.password-wrap {
+  position: relative;
+}
+.password-wrap input {
+  padding-right: 40px;
+}
+.toggle-pwd {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #bbb;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.toggle-pwd:hover { color: #666; }
+
+/* 辅助操作行 */
+.options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  font-size: 13px;
+}
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #666;
+}
+.remember-me input {
+  display: none;
+}
+.remember-me .check-box {
+  width: 18px; height: 18px;
+  border: 1.5px solid #ccc;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.remember-me input:checked + .check-box {
+  background: #8B5CF6;
+  border-color: #8B5CF6;
+}
+.remember-me input:checked + .check-box::after {
+  content: '✓';
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+.forgot-link {
+  color: #8B5CF6;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+.forgot-link:hover { text-decoration: underline; }
+
+/* 登录按钮 */
+.login-btn {
+  width: 100%;
+  padding: 14px;
+  background: #1E3A5F;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: background 0.3s, transform 0.15s;
+  margin-bottom: 16px;
+}
+.login-btn:hover { background: #2a5080; }
+.login-btn:active { transform: scale(0.97); }
+.login-btn.success { background: #4CAF50; }
+.login-btn.error { background: #E53935; }
+
+/* Google 登录按钮 */
+.google-btn {
+  width: 100%;
+  padding: 12px;
+  background: #f5f5f5;
+  color: #444;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.2s;
+  margin-bottom: 28px;
+}
+.google-btn:hover { background: #eee; }
+.google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* 底部注册引导 */
+.register-hint {
+  text-align: center;
+  font-size: 13px;
+  color: #999;
+}
+.register-link {
+  color: #8B5CF6;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.register-link:hover { text-decoration: underline; }
+
+/* 错误提示 */
+.error-msg {
+  color: #E53935;
+  font-size: 13px;
+  text-align: center;
+  min-height: 20px;
+  margin-top: -8px;
+  margin-bottom: 12px;
+}
+
+/* ========== 动画关键帧 ========== */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  15% { transform: translateX(-5px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+  90% { transform: translateX(2px); }
+}
+
+@keyframes headShake {
+  0%,100% { transform: rotate(0); }
+  15% { transform: rotate(-7deg); }
+  30% { transform: rotate(7deg); }
+  45% { transform: rotate(-5deg); }
+  60% { transform: rotate(5deg); }
+  75% { transform: rotate(-2deg); }
+  90% { transform: rotate(2deg); }
+}
+
+@keyframes blinkEye {
+  0%,88%,100% { transform: scaleY(1); }
+  94% { transform: scaleY(0.08); }
+}
+
+@keyframes popIn {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.head-shaking {
+  animation: headShake 0.6s ease;
+}
+
+.eye-blinking {
+  animation: blinkEye 0.38s ease;
+}
+
+.char-pop {
+  animation: popIn 0.35s ease;
+}
+
+/* 响应式 */
+@media (max-width: 900px) {
+  .container { flex-direction: column; }
+  .illustration-area { flex: 0 0 auto; height: 42vh; }
+  .characters-stage { transform: scale(0.7); }
+  .form-area { flex: 1; padding: 30px 24px; }
+  .form-title { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ===== 左侧插画区 ===== -->
+  <div class="illustration-area" id="illustArea">
+
+    <!-- 左上角标识 -->
+    <div class="brand-tag">
+      <span class="dot"></span>
+      <span>登录</span>
+    </div>
+
+    <!-- 角色舞台 -->
+    <div class="characters-stage" id="stage">
+      <!-- 紫色角色 — 左后方 -->
+      <div class="character char-purple" data-char="purple">
+        <div class="body-shape">
+          <div class="eyes-row" style="top:30px;">
+            <div class="eye-white" data-eye="L"><div class="pupil"></div></div>
+            <div class="eye-white" data-eye="R"><div class="pupil"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 黑色角色 — 中间后方 -->
+      <div class="character char-black" data-char="black">
+        <div class="body-shape">
+          <div class="eyes-row" style="top:38px;">
+            <div class="eye-white" data-eye="L"><div class="pupil"></div></div>
+            <div class="eye-white" data-eye="R"><div class="pupil"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 橙色角色 — 最前方 -->
+      <div class="character char-orange" data-char="orange">
+        <div class="body-shape">
+          <div class="eyes-row" style="top:28px;">
+            <span class="eye-dot-wrap"><span class="eye-dot" data-eye="L"></span></span>
+            <span class="eye-dot-wrap"><span class="eye-dot" data-eye="R"></span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 黄色角色 — 最右侧 -->
+      <div class="character char-yellow" data-char="yellow">
+        <div class="body-shape">
+          <div class="eyes-row" style="top:22px;">
+            <span class="eye-dot-wrap"><span class="eye-dot" data-eye="L"></span></span>
+            <span class="eye-dot-wrap"><span class="eye-dot" data-eye="R"></span></span>
+          </div>
+          <div class="mouth-line"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 左下角链接 -->
+    <div class="footer-links">
+      <span>隐私政策</span>
+      <span>|</span>
+      <span>服务条款</span>
+      <span>|</span>
+      <span>接触</span>
+    </div>
+  </div>
+
+  <!-- ===== 右侧表单区 ===== -->
+  <div class="form-area">
+    <div class="form-card">
+
+      <div class="title-icon">✦</div>
+      <h1 class="form-title" id="formTitle">欢迎回来！</h1>
+      <p class="form-subtitle">请填写您的详细信息</p>
+
+      <!-- 电子邮件 -->
+      <div class="input-group">
+        <label>电子邮件</label>
+        <div class="input-underline">
+          <input type="text" id="emailInput" placeholder="you@example.com" autocomplete="off">
+        </div>
+      </div>
+
+      <!-- 密码 -->
+      <div class="input-group">
+        <label>密码</label>
+        <div class="password-wrap">
+          <input type="password" id="pwdInput" placeholder="请输入密码">
+          <button class="toggle-pwd" id="togglePwd" title="显示/隐藏密码">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 辅助操作 -->
+      <div class="options-row">
+        <label class="remember-me">
+          <input type="checkbox" id="rememberCb" checked>
+          <span class="check-box"></span>
+          记住 30 天
+        </label>
+        <a class="forgot-link">忘记密码？</a>
+      </div>
+
+      <!-- 错误信息 -->
+      <div class="error-msg" id="errorMsg"></div>
+
+      <!-- 登录按钮 -->
+      <button class="login-btn" id="loginBtn">登录</button>
+
+      <!-- Google 登录 -->
+      <button class="google-btn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        使用 Google 登录
+      </button>
+
+      <!-- 注册引导 -->
+      <p class="register-hint">
+        还没有账号？<a class="register-link">立即注册</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ========== 元素引用 ==========
+const emailInput = document.getElementById('emailInput');
+const pwdInput = document.getElementById('pwdInput');
+const togglePwdBtn = document.getElementById('togglePwd');
+const loginBtn = document.getElementById('loginBtn');
+const formTitle = document.getElementById('formTitle');
+const errorMsg = document.getElementById('errorMsg');
+
+// ========== 收集所有眼睛数据 ==========
+const characters = document.querySelectorAll('.character');
+const allEyes = []; // { el, charEl, type: 'white'|'dot', pupilEl?, defaultCX, defaultCY }
+
+characters.forEach(charEl => {
+  const eyeWhites = charEl.querySelectorAll('.eye-white');
+  const eyeDotWraps = charEl.querySelectorAll('.eye-dot-wrap');
+
+  eyeWhites.forEach(ew => {
+    const pupil = ew.querySelector('.pupil');
+    allEyes.push({
+      charEl,
+      el: ew,           // 眨眼元素
+      moveEl: ew,       // 眼白本身不移动，只眨眼
+      pupilEl: pupil,
+      type: 'white',
+      baseCY: 0,
+    });
+  });
+
+  eyeDotWraps.forEach(wrap => {
+    const dot = wrap.querySelector('.eye-dot');
+    allEyes.push({
+      charEl,
+      el: dot,          // 眨眼元素（内部的dot）
+      moveEl: wrap,     // 移动元素（外层的wrap）
+      pupilEl: null,
+      type: 'dot',
+      baseCY: 0,
+    });
+  });
+});
+
+// 获取瞳孔初始偏移（白色眼睛中 pupil 的 top 值表示默认偏下）
+allEyes.forEach(eye => {
+  if (eye.type === 'white' && eye.pupilEl) {
+    const t = parseFloat(eye.pupilEl.style.top) || 55;
+    eye.baseCY = (t - 50) / 100; // 55% -> +0.05
+  }
+});
+
+// ========== 状态变量 ==========
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+let passwordVisible = false;
+let focusedInput = null;
+let lookTarget = 'mouse'; // 'mouse' | 'email' | 'password' | 'away'
+let isBlinking = false;
+let lastLoginError = false;
+let shakeTimeout = null;
+
+// ========== 工具函数 ==========
+function getInputCenter(input) {
+  const rect = input.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+}
+
+function getEyePagePos(eye) {
+  const rect = eye.moveEl.getBoundingClientRect();
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+    w: rect.width,
+    h: rect.height,
+  };
+}
+
+// ========== 瞳孔移动 ==========
+function moveAllEyes() {
+  let targetX, targetY;
+
+  if (lookTarget === 'email') {
+    const pos = getInputCenter(emailInput);
+    targetX = pos.x; targetY = pos.y;
+  } else if (lookTarget === 'password') {
+    const pos = getInputCenter(pwdInput);
+    targetX = pos.x; targetY = pos.y;
+  } else if (lookTarget === 'away') {
+    // 看向远处上方（密码框反方向）
+    allEyes.forEach(eye => {
+      const pos = getEyePagePos(eye);
+      const dx = 0;
+      const dy = -400 - pos.y;
+      applyEyeOffset(eye, dx, dy);
+    });
+    return;
+  } else {
+    targetX = mouseX; targetY = mouseY;
+  }
+
+  allEyes.forEach(eye => {
+    const pos = getEyePagePos(eye);
+    const dx = targetX - pos.x;
+    const dy = targetY - pos.y;
+    applyEyeOffset(eye, dx, dy);
+  });
+}
+
+function applyEyeOffset(eye, dx, dy) {
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const maxMove = eye.type === 'white' ? 3.2 : 3.8;
+  let mx, my;
+
+  if (dist > 0.5) {
+    const clamped = Math.min(dist, maxMove);
+    mx = (dx / dist) * clamped;
+    my = (dy / dist) * clamped;
+  } else {
+    mx = 0; my = 0;
+  }
+
+  if (eye.type === 'white') {
+    if (eye.pupilEl) {
+      const baseOffY = eye.baseCY * (eye.moveEl.clientHeight * 0.35);
+      eye.pupilEl.style.transform = `translate(calc(-50% + ${mx}px), calc(-50% + ${my + baseOffY}px))`;
+      eye.pupilEl.style.left = '50%';
+      eye.pupilEl.style.top = '50%';
+    }
+  } else {
+    eye.moveEl.style.transform = `translate(${mx}px, ${my}px)`;
+  }
+}
+
+// ========== 眨眼 ==========
+function blinkAll() {
+  if (isBlinking) return;
+  isBlinking = true;
+
+  allEyes.forEach(eye => {
+    eye.el.classList.add('eye-blinking');
+  });
+
+  setTimeout(() => {
+    allEyes.forEach(eye => {
+      eye.el.classList.remove('eye-blinking');
+    });
+    isBlinking = false;
+  }, 380);
+}
+
+// ========== 摇头 ==========
+function shakeAllHeads() {
+  characters.forEach(charEl => {
+    charEl.classList.add('head-shaking');
+    setTimeout(() => charEl.classList.remove('head-shaking'), 600);
+  });
+}
+
+// ========== 笑眼 ==========
+function setHappyEyes() {
+  allEyes.forEach(eye => {
+    if (eye.type === 'white') {
+      eye.el.style.borderRadius = '50%';
+      eye.el.style.height = '6px';
+      eye.el.style.marginTop = '10px';
+      if (eye.pupilEl) eye.pupilEl.style.display = 'none';
+    } else {
+      eye.el.style.width = '12px';
+      eye.el.style.height = '6px';
+      eye.el.style.borderRadius = '6px';
+      eye.el.style.marginTop = '4px';
+    }
+  });
+}
+
+function resetHappyEyes() {
+  allEyes.forEach(eye => {
+    if (eye.type === 'white') {
+      eye.el.style.borderRadius = '50%';
+      eye.el.style.height = '';
+      eye.el.style.marginTop = '';
+      if (eye.pupilEl) eye.pupilEl.style.display = '';
+    } else {
+      eye.el.style.width = '';
+      eye.el.style.height = '';
+      eye.el.style.borderRadius = '50%';
+      eye.el.style.marginTop = '';
+    }
+  });
+}
+
+// ========== 弹跳 ==========
+function popAllChars() {
+  characters.forEach(charEl => {
+    charEl.classList.add('char-pop');
+    setTimeout(() => charEl.classList.remove('char-pop'), 350);
+  });
+}
+
+// ========== 事件监听 ==========
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+document.addEventListener('click', (e) => {
+  if (e.target === togglePwdBtn || togglePwdBtn.contains(e.target)) return;
+  blinkAll();
+});
+
+emailInput.addEventListener('focus', () => {
+  focusedInput = emailInput;
+  lookTarget = 'email';
+  clearError();
+});
+emailInput.addEventListener('blur', () => {
+  if (focusedInput === emailInput) { focusedInput = null; lookTarget = 'mouse'; }
+});
+emailInput.addEventListener('input', () => {
+  emailInput.classList.toggle('has-content', !!emailInput.value.trim());
+  clearError();
+  if (focusedInput === emailInput) lookTarget = 'email';
+});
+
+pwdInput.addEventListener('focus', () => {
+  focusedInput = pwdInput;
+  lookTarget = passwordVisible ? 'password' : 'away';
+  clearError();
+});
+pwdInput.addEventListener('blur', () => {
+  if (focusedInput === pwdInput) { focusedInput = null; lookTarget = 'mouse'; }
+});
+pwdInput.addEventListener('input', () => {
+  pwdInput.classList.toggle('has-content', !!pwdInput.value.trim());
+  clearError();
+  if (focusedInput === pwdInput) lookTarget = passwordVisible ? 'password' : 'away';
+});
+
+togglePwdBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  passwordVisible = !passwordVisible;
+  if (passwordVisible) {
+    pwdInput.type = 'text';
+    lookTarget = focusedInput === pwdInput ? 'password' : 'mouse';
+  } else {
+    pwdInput.type = 'password';
+    lookTarget = focusedInput === pwdInput ? 'away' : 'mouse';
+  }
+});
+
+loginBtn.addEventListener('click', () => {
+  const email = emailInput.value.trim();
+  const pwd = pwdInput.value;
+
+  if (email === 'admin' && pwd === '123456') {
+    formTitle.classList.add('success');
+    formTitle.classList.remove('error');
+    loginBtn.classList.add('success');
+    loginBtn.classList.remove('error');
+    emailInput.classList.add('success');
+    emailInput.classList.remove('error');
+    pwdInput.classList.add('success');
+    pwdInput.classList.remove('error');
+    errorMsg.textContent = '';
+    setHappyEyes();
+    popAllChars();
+    lookTarget = 'mouse';
+  } else {
+    formTitle.classList.add('error');
+    formTitle.classList.remove('success');
+    loginBtn.classList.add('error');
+    loginBtn.classList.remove('success');
+    emailInput.classList.add('error');
+    emailInput.classList.remove('success');
+    pwdInput.classList.add('error');
+    pwdInput.classList.remove('success');
+    errorMsg.textContent = '账号或密码错误，请重试';
+    shakeAllHeads();
+    resetHappyEyes();
+    lookTarget = 'mouse';
+    lastLoginError = true;
+    if (shakeTimeout) clearTimeout(shakeTimeout);
+    shakeTimeout = setTimeout(() => {
+      emailInput.classList.remove('error');
+      pwdInput.classList.remove('error');
+      loginBtn.classList.remove('error');
+      formTitle.classList.remove('error');
+    }, 1600);
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') loginBtn.click();
+});
+
+function clearError() {
+  if (!lastLoginError) return;
+  emailInput.classList.remove('error');
+  pwdInput.classList.remove('error');
+  loginBtn.classList.remove('error');
+  formTitle.classList.remove('error');
+  errorMsg.textContent = '';
+  lastLoginError = false;
+}
+
+// ========== 动画循环 ==========
+function animate() {
+  moveAllEyes();
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
