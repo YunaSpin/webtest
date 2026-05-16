@@ -878,6 +878,7 @@ emailInput.addEventListener('blur', () => {
 });
 emailInput.addEventListener('input', () => {
   emailInput.classList.toggle('has-content', !!emailInput.value.trim());
+  blinkAll();
   clearError();
   if (focusedInput === emailInput) lookTarget = 'email';
 });
