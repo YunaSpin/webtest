@@ -113,8 +113,8 @@ body {
 
 /* ---- 紫色角色（左后方，最高） ---- */
 .char-purple {
-  width: 126px; height: 320px;
-  bottom: 40px; left: 60px;
+  width: 126px; height: 340px;
+  bottom: 20px; left: 60px;
   z-index: 1;
 }
 .char-purple .body-shape {
@@ -135,8 +135,8 @@ body {
 
 /* ---- 黑色角色（中间后方，次高） ---- */
 .char-black {
-  width: 100px; height: 256px;
-  bottom: 40px; left: 170px;
+  width: 100px; height: 276px;
+  bottom: 20px; left: 170px;
   z-index: 3;
 }
 .char-black .body-shape {
@@ -157,8 +157,8 @@ body {
 
 /* ---- 橙色角色（最前方，半圆形） ---- */
 .char-orange {
-  width: 170px; height: 130px;
-  bottom: 40px; left: 1px;
+  width: 165px; height: 150px;
+  bottom: 20px; left: 5px;
   z-index: 4;
 }
 .char-orange .body-shape {
@@ -175,8 +175,8 @@ body {
 
 /* ---- 黄色角色（最右侧，最矮） ---- */
 .char-yellow {
-  width: 100px; height: 162px;
-  bottom: 40px; right: 75px;
+  width: 100px; height: 182px;
+  bottom: 20px; right: 75px;
   z-index: 4;
 }
 .char-yellow .body-shape {
@@ -529,8 +529,11 @@ body {
           <div class="mouth-line"></div>
         </div>
       </div>
+       <div style="position: absolute; top: 90%; left: 0; width: 83%; height: 10%; background: #f5f0fa; z-index: 9999; pointer-events: none;"></div>
 
     </div>
+
+   
 
     <!-- 左下角链接 -->
     <div class="footer-links">
@@ -930,7 +933,7 @@ function tiltCharacters() {
     const charCX = rect.left + rect.width / 2;
     const dx = targetX - charCX;
     const angle = Math.max(-10, Math.min(10, (dx / winW) * 20));
-    charEl.style.transform = `skewX(${-angle}deg)`;
+    charEl.style.transform = `rotate(${angle}deg)`;
   });
 }
 
