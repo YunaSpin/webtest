@@ -61,6 +61,7 @@ body {
 .character {
   position: absolute;
   transition: transform 0.08s ease-out;
+  transform-origin: bottom center;
 }
 .character .body-shape {
   position: relative;
@@ -122,7 +123,7 @@ body {
   width: 100%; height: 100%;
 }
 .char-purple .eyes-row {
-  gap: 20px;
+  gap: 29px;
 }
 .char-purple .eye-white {
   width: 16px; height: 16px;
@@ -501,7 +502,7 @@ body {
       <!-- 黑色角色 — 中间后方 -->
       <div class="character char-black" data-char="black">
         <div class="body-shape">
-          <div class="eyes-row" style="top:38px;">
+          <div class="eyes-row" style="top:30px;">
             <div class="eye-white" data-eye="L"><div class="pupil"></div></div>
             <div class="eye-white" data-eye="R"><div class="pupil"></div></div>
           </div>
@@ -913,9 +914,29 @@ function clearError() {
   lastLoginError = false;
 }
 
+
 // ========== 动画循环 ==========
+function getTargetX() {
+  if (lookTarget === 'email') return getInputCenter(emailInput).x;
+  if (lookTarget === 'password') return getInputCenter(pwdInput).x;
+  return mouseX;
+}
+
+function tiltCharacters() {
+  const targetX = getTargetX();
+  const winW = window.innerWidth;
+  characters.forEach(charEl => {
+    const rect = charEl.getBoundingClientRect();
+    const charCX = rect.left + rect.width / 2;
+    const dx = targetX - charCX;
+    const angle = Math.max(-10, Math.min(10, (dx / winW) * 20));
+    charEl.style.transform = `skewX(${-angle}deg)`;
+  });
+}
+
 function animate() {
   moveAllEyes();
+  tiltCharacters();
   requestAnimationFrame(animate);
 }
 animate();
