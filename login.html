@@ -863,12 +863,9 @@ document.addEventListener('mousemove', (e) => {
 });
 
 document.addEventListener('click', (e) => {
-  if (e.target === togglePwdBtn || togglePwdBtn.contains(e.target)) return;
+  if (e.target === togglePwdBtn || togglePwdBtn.contains(e.target) ||e.target === pwdInput || pwdInput.contains(e.target)) return;
+  lookTarget = 'mouse';
   blinkAll();
-  if (isYinCnag) {
-    lookTarget = 'mouse';
-    isYinCnag = false;
-  }
 });
 
 emailInput.addEventListener('focus', () => {
@@ -891,7 +888,7 @@ pwdInput.addEventListener('focus', () => {
   clearError();
 });
 pwdInput.addEventListener('blur', () => {
-  if (focusedInput === pwdInput) { focusedInput = null }
+  if (focusedInput === pwdInput) { focusedInput = null}
 });
 pwdInput.addEventListener('input', () => {
   pwdInput.classList.toggle('has-content', !!pwdInput.value.trim());
@@ -901,7 +898,7 @@ pwdInput.addEventListener('input', () => {
 
 togglePwdBtn.addEventListener('click', (e) => {
   e.stopPropagation();
-  isYinCnag = true;
+  
   passwordVisible = !passwordVisible;
   if (passwordVisible) {
     pwdInput.type = 'text';
