@@ -453,6 +453,16 @@ body {
   100% { transform: scale(1); }
 }
 
+@keyframes eyeWobble {
+  0%,100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(-5px); }
+  60% { transform: translateX(5px); }
+  75% { transform: translateX(-3px); }
+  90% { transform: translateX(3px); }
+}
+
 .head-shaking {
   animation: headShake 0.6s ease;
 }
@@ -463,6 +473,10 @@ body {
 
 .char-pop {
   animation: popIn 0.35s ease;
+}
+
+.eye-wobbling {
+  animation: eyeWobble 0.6s ease;
 }
 
 /* 响应式 */
@@ -620,6 +634,8 @@ const togglePwdBtn = document.getElementById('togglePwd');
 const loginBtn = document.getElementById('loginBtn');
 const formTitle = document.getElementById('formTitle');
 const errorMsg = document.getElementById('errorMsg');
+const mouthLine = document.querySelector('.mouth-line');
+const charYellow = document.querySelector('.char-yellow');
 
 // ========== 收集所有眼睛数据 ==========
 const characters = document.querySelectorAll('.character');
@@ -671,6 +687,7 @@ let lookTarget = 'mouse'; // 'mouse' | 'email' | 'password' | 'away'
 let isBlinking = false;
 let lastLoginError = false;
 let shakeTimeout = null;
+let isYinCnag = false;
 
 // ========== 工具函数 ==========
 function getInputCenter(input) {
@@ -699,7 +716,6 @@ function moveAllEyes() {
     const pos = getInputCenter(pwdInput);
     targetX = pos.x; targetY = pos.y;
   } else if (lookTarget === 'away') {
-    // 看向远处上方（密码框反方向）
     allEyes.forEach(eye => {
       const pos = getEyePagePos(eye);
       const dx = 0;
@@ -707,8 +723,28 @@ function moveAllEyes() {
       applyEyeOffset(eye, dx, dy);
     });
     return;
+  } else if (lookTarget === 'up') {
+    allEyes.forEach(eye => {
+      const pos = getEyePagePos(eye);
+      const dx = 0;
+      const dy = -300 - pos.y;
+      applyEyeOffset(eye, dx, dy);
+    });
+    mouthLine.style.transform = `translateX(-50%)`;
+    return;
+  } else if (lookTarget === 'left') {
+    allEyes.forEach(eye => {
+      const pos = getEyePagePos(eye);
+      const dx = -300 - pos.x;
+      const dy = 0;
+      applyEyeOffset(eye, dx, dy);
+
+    });
+    mouthLine.style.transform = `translateX(-70%)`;
+    return;
   } else {
     targetX = mouseX; targetY = mouseY;
+    
   }
 
   allEyes.forEach(eye => {
@@ -716,6 +752,7 @@ function moveAllEyes() {
     const dx = targetX - pos.x;
     const dy = targetY - pos.y;
     applyEyeOffset(eye, dx, dy);
+    
   });
 }
 
@@ -761,11 +798,19 @@ function blinkAll() {
   }, 380);
 }
 
-// ========== 摇头 ==========
+// ========== 摇头（保留兼容） ==========
 function shakeAllHeads() {
   characters.forEach(charEl => {
     charEl.classList.add('head-shaking');
     setTimeout(() => charEl.classList.remove('head-shaking'), 600);
+  });
+}
+
+// ========== 眼球晃动 ==========
+function shakeAllEyes() {
+  allEyes.forEach(eye => {
+    eye.el.classList.add('eye-wobbling');
+    setTimeout(() => eye.el.classList.remove('eye-wobbling'), 600);
   });
 }
 
@@ -820,6 +865,10 @@ document.addEventListener('mousemove', (e) => {
 document.addEventListener('click', (e) => {
   if (e.target === togglePwdBtn || togglePwdBtn.contains(e.target)) return;
   blinkAll();
+  if (isYinCnag) {
+    lookTarget = 'mouse';
+    isYinCnag = false;
+  }
 });
 
 emailInput.addEventListener('focus', () => {
@@ -838,27 +887,28 @@ emailInput.addEventListener('input', () => {
 
 pwdInput.addEventListener('focus', () => {
   focusedInput = pwdInput;
-  lookTarget = passwordVisible ? 'password' : 'away';
+  lookTarget = passwordVisible ? 'up' : 'left';
   clearError();
 });
 pwdInput.addEventListener('blur', () => {
-  if (focusedInput === pwdInput) { focusedInput = null; lookTarget = 'mouse'; }
+  if (focusedInput === pwdInput) { focusedInput = null }
 });
 pwdInput.addEventListener('input', () => {
   pwdInput.classList.toggle('has-content', !!pwdInput.value.trim());
   clearError();
-  if (focusedInput === pwdInput) lookTarget = passwordVisible ? 'password' : 'away';
+  if (focusedInput === pwdInput) lookTarget = passwordVisible ? 'up' : 'left';
 });
 
 togglePwdBtn.addEventListener('click', (e) => {
   e.stopPropagation();
+  isYinCnag = true;
   passwordVisible = !passwordVisible;
   if (passwordVisible) {
     pwdInput.type = 'text';
-    lookTarget = focusedInput === pwdInput ? 'password' : 'mouse';
+    lookTarget = 'up';
   } else {
     pwdInput.type = 'password';
-    lookTarget = focusedInput === pwdInput ? 'away' : 'mouse';
+    lookTarget = 'left';
   }
 });
 
@@ -889,7 +939,7 @@ loginBtn.addEventListener('click', () => {
     pwdInput.classList.add('error');
     pwdInput.classList.remove('success');
     errorMsg.textContent = '账号或密码错误，请重试';
-    shakeAllHeads();
+    shakeAllEyes();
     resetHappyEyes();
     lookTarget = 'mouse';
     lastLoginError = true;
@@ -926,6 +976,13 @@ function getTargetX() {
 }
 
 function tiltCharacters() {
+  // 密码框聚焦时所有角色恢复直立
+  if (focusedInput === pwdInput || lookTarget === 'up' || lookTarget === 'left') {
+    characters.forEach(charEl => {
+      charEl.style.transform = 'rotate(0deg)';
+    });
+    return;
+  }
   const targetX = getTargetX();
   const winW = window.innerWidth;
   characters.forEach(charEl => {
@@ -940,6 +997,13 @@ function tiltCharacters() {
 function animate() {
   moveAllEyes();
   tiltCharacters();
+  // 黄色角色嘴巴跟随鼠标左右移动
+  if (mouthLine && charYellow && lookTarget !== 'left' && lookTarget !== 'email' && lookTarget !== 'up') {
+    const yr = charYellow.getBoundingClientRect();
+    const charCX = yr.left + yr.width / 2;
+    const mx = Math.max(-8, Math.min(8, (mouseX - charCX) * 0.06));
+    mouthLine.style.transform = `translateX(calc(-50% + ${mx}px))`;
+  }
   requestAnimationFrame(animate);
 }
 animate();
